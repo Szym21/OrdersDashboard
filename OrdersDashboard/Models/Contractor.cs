@@ -5,7 +5,7 @@ namespace OrdersDashboard.Models;
 
 public partial class Contractor
 {
-    public int IdKontrahenta { get; set; }
+    public int? IdKontrahenta { get; set; }
 
     public string? Nazwa { get; set; }
 
