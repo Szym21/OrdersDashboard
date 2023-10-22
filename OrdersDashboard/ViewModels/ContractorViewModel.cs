@@ -12,7 +12,8 @@ namespace OrdersDashboard.ViewModels
     {
         readonly ContractorsOrdersContext _context;
 
-        public string? Filter { get; set; }
+        public string? ContractorFilter { get; set; }
+        public string? OrderFilter { get; set; }
 
         bool _editMode;
         public bool EditMode
@@ -61,8 +62,10 @@ namespace OrdersDashboard.ViewModels
         public ICommand? SaveChangesCmd { get; set; }
         public ICommand? DiscardChangesCmd { get; set; }
         public ICommand? FilterContractorCmd { get; set; }
+        public ICommand? FilterOrderCmd { get; set; }
         public ICommand? AddNewOrderCmd{ get; set; }
         public ICommand? SaveNewOrderCmd{ get; set; }
+        public ICommand? DeleteOrderCmd { get; set; }
 
         public ContractorViewModel()
         {
@@ -94,8 +97,10 @@ namespace OrdersDashboard.ViewModels
             SaveChangesCmd = new RelayCommand(SaveContractorChanges, CanSaveChanges);
             DiscardChangesCmd = new RelayCommand(DiscardChanges, CanDiscardChanges);
             FilterContractorCmd = new RelayCommand(FilterContractors, CanFilterContractors);
+            FilterOrderCmd = new RelayCommand(FilterOrders, CanFilterOrders);
             AddNewOrderCmd = new RelayCommand(AddOrder, CanAddOrder);
             SaveNewOrderCmd = new RelayCommand(SaveOrder, CanSaveOrder);
+            DeleteOrderCmd = new RelayCommand(DeleteOrder, CanDeleteOrder);
         }
         void AddNewContractor(object value)
         {
@@ -142,11 +147,15 @@ namespace OrdersDashboard.ViewModels
         bool CanDiscardChanges(object value) => SelectedContractor is not null && EditMode;
         void FilterContractors(object value)
         {
-            if (Filter is null) return;
             this.Contractors = _context.Contractors
-                .Where(c =>c.Nazwa != null && c.Nazwa.Contains(Filter)).ToList();
+                .Where(c =>c.Nazwa != null && c.Nazwa.Contains(ContractorFilter)).ToList();
         }
-        bool CanFilterContractors(object value) => !EditMode && Filter is not null;
+        bool CanFilterContractors(object value) => !EditMode && ContractorFilter is not null;
+        void FilterOrders(object value)
+        {
+            this.Orders = Orders.Where(c => c.Numer != null && c.Numer.Contains(OrderFilter)).ToList();
+        }
+        bool CanFilterOrders(object value) => !EditMode && OrderFilter is not null;
         void AddOrder(object value)
         {
             SelectedOrder = new();
@@ -158,7 +167,6 @@ namespace OrdersDashboard.ViewModels
             if (SelectedOrder is null && SelectedContractor is not null && !EditMode) return true;
             return false;
         }
-
         void SaveOrder(object value)
         {
             if (SelectedOrder?.IdZamowienia is null)
@@ -188,6 +196,17 @@ namespace OrdersDashboard.ViewModels
         {
             if (SelectedOrder is not null && SelectedOrder.IdKontrahenta > 0) return true;
             return false;
+        }
+        void DeleteOrder(object value)
+        {
+            _context.Orders.Remove(SelectedOrder);
+            _context.SaveChanges();
+            SelectedOrder = null;
+            FillOrders();
+        }
+        bool CanDeleteOrder(object value)
+        {
+            return SelectedOrder is not null && SelectedOrder.IdZamowienia is not null;
         }
     }
 }

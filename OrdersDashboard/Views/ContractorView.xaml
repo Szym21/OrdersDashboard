@@ -8,7 +8,7 @@
              mc:Ignorable="d" 
              Foreground="DarkSlateGray"
              Background="FloralWhite"
-             d:DesignHeight="400" d:DesignWidth="460">
+             d:DesignHeight="400" d:DesignWidth="500">
     <UserControl.DataContext>
         <vm:ContractorViewModel/>
     </UserControl.DataContext>
@@ -25,9 +25,9 @@
             <RowDefinition Height="25" />
             <RowDefinition Height="100" />
             <RowDefinition Height="25" />
+            <RowDefinition Height="20" />
             <RowDefinition Height="*" />
             <RowDefinition Height="25" />
-            <RowDefinition Height="20" />
         </Grid.RowDefinitions>       
 
         <TextBox Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3"
@@ -86,10 +86,13 @@
                 Content="Usuń" Foreground="DarkSlateGray" Command="{Binding DeleteContractorCmd}"></Button>
         <Button Grid.Column="4" Grid.Row="3"  Margin="3,3,3,3"
                 Content="Dodaj nowe zamówienie" Foreground="DarkSlateGray" Command="{Binding AddNewOrderCmd}"></Button>
+        <TextBox Grid.Column="4" Grid.Row="4" Margin="0,0,3,0" Text="{Binding OrderFilter}"></TextBox>
+        <Button Grid.Column="4" Grid.Row="4"  Margin="200,0,3,0"
+        Content="Filtruj" Foreground="DarkSlateGray" Command="{Binding FilterOrderCmd}"></Button>
         
         <DataGrid AutoGenerateColumns="False"
                 ItemsSource="{Binding Orders}"
-                Grid.Row="4" Grid.RowSpan ="1" 
+                Grid.Row="5" Grid.RowSpan ="1" 
                 Grid.Column="0" Grid.ColumnSpan="5"
                 SelectionMode="Single"
                 Name="OrderList" 
@@ -105,15 +108,16 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <Grid Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="5" Grid.RowSpan="2">
+        <Grid Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="6">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="100" />
                 <ColumnDefinition Width="20" />
                 <ColumnDefinition Width="100" />
-                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="90" />
                 <ColumnDefinition Width="10" />
                 <ColumnDefinition Width="50" />
-                <ColumnDefinition Width="50" />
+                <ColumnDefinition Width="45" />
+                <ColumnDefinition Width="45" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="25"/>
@@ -124,6 +128,7 @@
             <TextBox Grid.Column="2" Text="{Binding SelectedOrder.Numer}"></TextBox>
             <TextBox Grid.Column="5" Text="{Binding SelectedOrder.IdKontrahenta}"></TextBox>
             <Button Grid.Column="6" Margin="3,3,3,3" Content="Zapisz" Command="{Binding SaveNewOrderCmd}"></Button>
+            <Button Grid.Column="7" Margin="3,3,3,3" Content="Usuń" Command="{Binding DeleteOrderCmd}"></Button>
         </Grid>
     </Grid>
 </UserControl>
