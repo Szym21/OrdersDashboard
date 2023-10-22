@@ -4,7 +4,7 @@ namespace OrdersDashboard.Models;
 
 public partial class Order
 {
-    public int IdZamowienia { get; set; }
+    public int? IdZamowienia { get; set; }
 
     public int? IdKontrahenta { get; set; }
 

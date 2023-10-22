@@ -8,9 +8,11 @@ using System.Windows.Input;
 
 namespace OrdersDashboard.ViewModels
 {
-    public class ContractorViewModel :BaseViewModel
+    public class ContractorViewModel : BaseViewModel
     {
         readonly ContractorsOrdersContext _context;
+
+        public string? Filter { get; set; }
 
         bool _editMode;
         public bool EditMode
@@ -41,6 +43,7 @@ namespace OrdersDashboard.ViewModels
             { 
                 _selectedContractor = value; 
                 NotifyPropertyChanged();
+                SelectedOrder = null;
                 FillOrders();
             }
         }
@@ -57,6 +60,9 @@ namespace OrdersDashboard.ViewModels
         public ICommand? DeleteContractorCmd { get; set; }
         public ICommand? SaveChangesCmd { get; set; }
         public ICommand? DiscardChangesCmd { get; set; }
+        public ICommand? FilterContractorCmd { get; set; }
+        public ICommand? AddNewOrderCmd{ get; set; }
+        public ICommand? SaveNewOrderCmd{ get; set; }
 
         public ContractorViewModel()
         {
@@ -85,8 +91,11 @@ namespace OrdersDashboard.ViewModels
             NewContractorCmd = new RelayCommand(AddNewContractor, CanAddNewContractor);
             EditContractorCmd = new RelayCommand(EditContractor, CanEditContractor);
             DeleteContractorCmd = new RelayCommand(DeleteContractor, CanDeleteContractor);
-            SaveChangesCmd = new RelayCommand(SaveChanges, CanSaveChanges);
+            SaveChangesCmd = new RelayCommand(SaveContractorChanges, CanSaveChanges);
             DiscardChangesCmd = new RelayCommand(DiscardChanges, CanDiscardChanges);
+            FilterContractorCmd = new RelayCommand(FilterContractors, CanFilterContractors);
+            AddNewOrderCmd = new RelayCommand(AddOrder, CanAddOrder);
+            SaveNewOrderCmd = new RelayCommand(SaveOrder, CanSaveOrder);
         }
         void AddNewContractor(object value)
         {
@@ -106,7 +115,7 @@ namespace OrdersDashboard.ViewModels
             FillContractors();
         }
         bool CanDeleteContractor(object value) => SelectedContractor?.Orders.Count == 0;
-        void SaveChanges(object value)
+        void SaveContractorChanges(object value)
         {
             if (SelectedContractor?.IdKontrahenta is null)
             {
@@ -131,5 +140,54 @@ namespace OrdersDashboard.ViewModels
             EditMode = false;
         }
         bool CanDiscardChanges(object value) => SelectedContractor is not null && EditMode;
+        void FilterContractors(object value)
+        {
+            if (Filter is null) return;
+            this.Contractors = _context.Contractors
+                .Where(c =>c.Nazwa != null && c.Nazwa.Contains(Filter)).ToList();
+        }
+        bool CanFilterContractors(object value) => !EditMode && Filter is not null;
+        void AddOrder(object value)
+        {
+            SelectedOrder = new();
+            SelectedOrder.IdZamowienia = null;
+            SelectedOrder.IdKontrahenta = SelectedContractor.IdKontrahenta;
+        }
+        bool CanAddOrder(object value)
+        {
+            if (SelectedOrder is null && SelectedContractor is not null && !EditMode) return true;
+            return false;
+        }
+
+        void SaveOrder(object value)
+        {
+            if (SelectedOrder?.IdZamowienia is null)
+            {
+                SelectedOrder.DataDodania = System.DateTime.Now;
+                _context.Orders.Add(SelectedOrder);
+                _context.SaveChanges();
+                MessageBox.Show($"Dodano nowe zamówienie: {SelectedOrder.Numer}");
+            }
+            else
+            {
+                if (Contractors.Exists(c => c.IdKontrahenta == SelectedOrder.IdKontrahenta))
+                {
+                    _context.SaveChanges();
+                    MessageBox.Show($"Zakończono edycje zamówienia: {SelectedOrder.Numer}");
+                }
+                else
+                {
+                    MessageBox.Show($"Nie istnieje kontrahent o takim identyfikatorze: {SelectedOrder.IdKontrahenta}");
+                    SelectedOrder.IdKontrahenta = SelectedContractor.IdKontrahenta;
+                }
+            }
+            SelectedOrder = null;
+            FillOrders();
+        }
+        bool CanSaveOrder(object value)
+        {
+            if (SelectedOrder is not null && SelectedOrder.IdKontrahenta > 0) return true;
+            return false;
+        }
     }
 }
